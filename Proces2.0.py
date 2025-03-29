@@ -7,7 +7,7 @@ import logging
 from tqdm import tqdm
 import warnings
 import os
-
+#This is the second method I used to analyze this file, it really takes too long to process and more precisely about two hours 
 # Configurare logging
 logging.basicConfig(
     level=logging.INFO,
