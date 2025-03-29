@@ -10,7 +10,6 @@ import warnings
 from pathlib import Path
 import os
 
-# Configurare logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
@@ -22,15 +21,15 @@ def preprocess_url(url):
     try:
         if pd.isna(url):
             return ""
-        # Convertim la lowercase și eliminăm whitespace
+       
         url = str(url).lower().strip()
-        # Eliminăm protocol (http/https)
+       
         url = re.sub(r'https?://', '', url)
-        # Eliminăm www
+       
         url = re.sub(r'www\.', '', url)
-        # Eliminăm parametrii query
+     
         url = url.split('?')[0]
-        # Eliminăm trailing slash
+   
         url = url.rstrip('/')
         return url
     except Exception as e:
@@ -112,9 +111,8 @@ def find_similar_products(df):
                 if j in processed_indices:
                     continue
                 
-                # Verificăm mai întâi domain-ul
+              
                 if current_domain == df.iloc[j]['root_domain']:
-                    # Calculăm similaritatea URL-urilor
                     url_similarity = calculate_url_similarity(
                         current_url,
                         df.iloc[j]['page_url']
@@ -139,30 +137,28 @@ def process_parquet_file():
     try:
         input_file = 'veridion_product_deduplication_challenge.snappy.parquet'
         logger.info(f"Începe procesarea fișierului: {input_file}")
-        
-        # Verificăm existența fișierului
+     
         if not os.path.exists(input_file):
             raise FileNotFoundError(f"Fișierul {input_file} nu există în directorul curent!")
         
-        # Citim fișierul Parquet
         logger.info("Citire fișier Parquet...")
         table = pq.read_table(input_file)
         df = table.to_pandas()
         logger.info(f"Date încărcate cu succes. Dimensiune inițială: {df.shape}")
         logger.info(f"Coloane disponibile: {df.columns.tolist()}")
         
-        # Verificăm existența coloanelor necesare
+        
         required_columns = ['root_domain', 'page_url']
         missing_columns = [col for col in required_columns if col not in df.columns]
         if missing_columns:
             raise ValueError(f"Coloanele necesare nu există în fișier: {missing_columns}")
         
-        # Găsim grupurile de produse similare
+      
         logger.info("Începe identificarea produselor similare...")
         similarity_groups = find_similar_products(df)
         logger.info(f"Grupuri de similaritate găsite: {len(similarity_groups)}")
         
-        # Procesăm rezultatele
+ 
         logger.info("Procesare grupurile de produse similare...")
         result_products = []
         processed_indices = set()
@@ -181,12 +177,12 @@ def process_parquet_file():
         unique_products = df[~df.index.isin(processed_indices)]
         result_products.extend(unique_products.to_dict('records'))
         
-        # Creăm DataFrame-ul final și salvăm în Excel
+        # Creăm DataFrame-ul final și salvăm în Excel  :))
         logger.info("Creare și salvare rezultat final...")
         result_df = pd.DataFrame(result_products)
         result_df.to_excel('Result.xlsx', index=False)
         
-        # Afișăm statistici
+        # Afișăm statistici  Asta pentru final dar nu inteleg de ce dureaza cateva ore sa se proceseze vad co o face 10 comparari pe secunda sau ceva de genu asta mis e pare foarte incet
         logger.info(f"\nStatistici finale:")
         logger.info(f"Număr inițial de produse: {len(df)}")
         logger.info(f"Număr final de produse: {len(result_df)}")
